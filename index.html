@@ -1,10 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lone Star Arcade</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body style="background:#13002b;color:white;font-family:Arial;text-align:center;padding:80px;">
-  <h1>🤠 Lone Star Arcade</h1>
-  <p>It works! Texas games coming soon.</p>
+<body>
+
+  <header class="header">
+    🤠 Lone Star Arcade
+  </header>
+
+  <main class="arcade">
+
+    <div class="cabinet">
+      <h2>Texas Pong</h2>
+      <button onclick="launchGame('games/pong/index.html')">Play</button>
+    </div>
+
+    <div class="cabinet">
+      <h2>BBQ Dash</h2>
+      <button onclick="launchGame('games/bbq/index.html')">Play</button>
+    </div>
+
+    <div class="cabinet">
+      <h2>Bluebonnet Blaster</h2>
+      <button onclick="launchGame('games/shooter/index.html')">Play</button>
+    </div>
+
+  </main>
+
+  <!-- Game Modal -->
+  <div id="gameModal" class="modal">
+    <span class="close" onclick="closeGame()">✕</span>
+    <iframe id="gameFrame"></iframe>
+  </div>
+
+  <script src="script.js"></script>
+
 </body>
 </html>
