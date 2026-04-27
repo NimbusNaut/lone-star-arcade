@@ -59,16 +59,17 @@
       z-index: 999;
     }
 
-    .score-box {
-      background: #1F3A5F;
-      border: 3px solid #F4F1EC;
-      border-radius: 16px;
-      padding: 24px;
-      width: 320px;
-      text-align: center;
-      color: white;
-      box-shadow: 0 0 25px rgba(191,47,47,0.7);
-    }
+.score-box {
+  background: #1F3A5F;
+  border: 3px solid #F4F1EC;
+  border-radius: 16px;
+  padding: 24px;
+  width: min(320px, 90vw);
+  box-sizing: border-box;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 25px rgba(191,47,47,0.7);
+}
 
     .score-box h2 {
       margin: 0 0 8px;
@@ -79,15 +80,16 @@
       margin: 6px 0;
     }
 
-    .score-box input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      border-radius: 8px;
-      border: 0;
-      font-size: 16px;
-      text-align: center;
-    }
+.score-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: 0;
+  font-size: 16px;
+  text-align: center;
+}
 
     .score-actions {
       display: flex;
@@ -350,7 +352,7 @@ window.getScores = async function() {
   const list = document.getElementById("scoresList");
 
   try {
-    const q = query(ref(db, "scores/pong"), orderByChild("score"), limitToLast(10));
+    const q = query(ref(db, "scores/pong"), orderByChild("score"), limitToLast(5));
     const snapshot = await get(q);
 
     const scores = [];
