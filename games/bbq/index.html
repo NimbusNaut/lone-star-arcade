@@ -51,6 +51,18 @@
 
 <body>
 
+  <div id="scoreModal" class="score-modal">
+  <div class="score-box">
+    <h2>🏆 New High Score!</h2>
+    <p>Enter your name:</p>
+    <input id="playerName" type="text" maxlength="20" placeholder="Your name" />
+    <div class="score-actions">
+      <button onclick="submitScore()">Save Score</button>
+      <button onclick="skipScore()">Skip</button>
+    </div>
+  </div>
+</div>
+
 <canvas id="game" width="400" height="600"></canvas>
 
 <div id="leaderboard">
