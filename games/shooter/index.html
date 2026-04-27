@@ -26,264 +26,6 @@
       touch-action: none;
     }
 
-    <!DOCTYPE html>
-<html>
-<head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B45GQ3KZ3X');
-  </script>
-
-  <title>BBQ Dash</title>
-
-  <style>
-    body {
-      margin: 0;
-      background: #BF2F2F;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: white;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-      touch-action: none;
-    }
-
-    canvas {
-      background: #1F3A5F;
-      border: 4px solid white;
-    }
-
-    #leaderboard {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.8);
-      padding: 12px;
-      border-radius: 8px;
-      width: 200px;
-      font-size: 14px;
-    }
-
-    #leaderboard strong {
-      display: block;
-      margin-bottom: 8px;
-    }
-  </style>
-</head>
-
-<body>
-
-  <div id="scoreModal" class="score-modal">
-  <div class="score-box">
-    <h2>🏆 New High Score!</h2>
-    <p>Enter your name:</p>
-    <input id="playerName" type="text" maxlength="20" placeholder="Your name" />
-    <div class="score-actions">
-      <button onclick="submitScore()">Save Score</button>
-      <button onclick="skipScore()">Skip</button>
-    </div>
-  </div>
-</div>
-
-<canvas id="game" width="400" height="600"></canvas>
-
-<div id="leaderboard">
-  <strong>🏆 Top Scores</strong>
-  <div id="scoresList">Loading...</div>
-</div>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-let basketX = 150;
-let foodY = -20;
-let foodX = Math.random() * 350;
-let score = 0;
-let gameOver = false;
-
-let foodSpeed = 5;
-let speedIncrease = 1;
-let maxFoodSpeed = 12;
-
-let meatEmoji = "🍖";
-const meats = ["🍖", "🍗", "🥩", "🌭"];
-
-function moveBasket(clientX) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  basketX = (clientX - rect.left) * scaleX - 45;
-
-  if (basketX < 0) basketX = 0;
-  if (basketX > 310) basketX = 310;
-}
-
-document.addEventListener("mousemove", e => {
-  moveBasket(e.clientX);
-});
-
-document.addEventListener("touchmove", e => {
-  e.preventDefault();
-  moveBasket(e.touches[0].clientX);
-}, { passive: false });
-
-function draw() {
-  ctx.clearRect(0, 0, 400, 600);
-
-  ctx.fillStyle = "white";
-  ctx.font = "20px Arial";
-  ctx.fillText("Score: " + score, 10, 25);
-  ctx.fillText("Speed: " + foodSpeed.toFixed(1), 10, 50);
-
-  ctx.font = "48px serif";
-  ctx.fillText("🤠", basketX, 575);
-
-  ctx.font = "32px serif";
-  ctx.fillText(meatEmoji, foodX - 12, foodY + 10);
-
-  if (gameOver) {
-    ctx.fillStyle = "white";
-    ctx.font = "32px Arial";
-    ctx.fillText("Game Over", 110, 280);
-    ctx.font = "18px Arial";
-    ctx.fillText("Refresh to play again", 105, 315);
-  }
-}
-
-function chooseNewMeat() {
-  let newMeat;
-
-  do {
-    newMeat = meats[Math.floor(Math.random() * meats.length)];
-  } while (newMeat === meatEmoji);
-
-  meatEmoji = newMeat;
-}
-
-function update() {
-  if (gameOver) return;
-
-  foodY += foodSpeed;
-
-  const foodHeight = 24;
-  const ballBottom = foodY + foodHeight;
-  const basketTop = 545;
-  const basketLeft = basketX;
-  const basketRight = basketX + 55;
-
-  const caught =
-    ballBottom >= basketTop &&
-    foodX >= basketLeft &&
-    foodX <= basketRight;
-
-  if (caught) {
-    score++;
-
-    if (score % 10 === 0) {
-      foodSpeed = Math.min(foodSpeed + speedIncrease, maxFoodSpeed);
-    }
-
-    if (score % 30 === 0) {
-      chooseNewMeat();
-    }
-
-    foodY = -20;
-    foodX = Math.random() * 350;
-    return;
-  }
-
-  if (foodY > 620) {
-    endGame();
-  }
-}
-
-function endGame() {
-  gameOver = true;
-
-  if (score <= 0) return;
-
-  const name = prompt("Enter your name:");
-  if (!name) return;
-
-  saveScore(name, score);
-}
-
-function loop() {
-  update();
-  draw();
-}
-
-setInterval(loop, 1000 / 60);
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getDatabase, ref, push, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
-  authDomain: "lone-star-arcade.firebaseapp.com",
-  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
-  projectId: "lone-star-arcade",
-  storageBucket: "lone-star-arcade.firebasestorage.app",
-  messagingSenderId: "883063669150",
-  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-window.saveScore = function(name, score) {
-  push(ref(db, "scores/bbq"), {
-    name,
-    score,
-    time: Date.now()
-  }).then(() => {
-    getScores();
-  });
-};
-
-window.getScores = async function() {
-  const list = document.getElementById("scoresList");
-
-  try {
-    const q = query(ref(db, "scores/bbq"), orderByChild("score"), limitToLast(10));
-    const snapshot = await get(q);
-
-    const scores = [];
-    snapshot.forEach(child => {
-      scores.push(child.val());
-    });
-
-    scores.reverse();
-
-    if (scores.length === 0) {
-      list.innerHTML = "No scores yet";
-      return;
-    }
-
-    list.innerHTML = scores.map((s, i) =>
-      `<div>${i + 1}. ${s.name}: ${s.score}</div>`
-    ).join("");
-
-  } catch (err) {
-    console.error(err);
-    list.innerHTML = "⚠️ Error loading scores";
-  }
-};
-
-getScores();
-</script>
-
-</body>
-</html>
-
     canvas {
       background: black;
       border: 4px solid #6F7D5C;
@@ -304,6 +46,71 @@ getScores();
       display: block;
       margin-bottom: 8px;
     }
+
+    .score-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .score-box {
+      background: #1F3A5F;
+      border: 3px solid #F4F1EC;
+      border-radius: 16px;
+      padding: 24px;
+      width: 320px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 25px rgba(191,47,47,0.7);
+    }
+
+    .score-box h2 {
+      margin: 0 0 8px;
+      color: #F4F1EC;
+    }
+
+    .score-box p {
+      margin: 6px 0;
+    }
+
+    .score-box input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 0;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .score-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .score-actions button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .score-actions button:first-child {
+      background: #BF2F2F;
+      color: white;
+    }
+
+    .score-actions button:last-child {
+      background: #F4F1EC;
+      color: #1F3A5F;
+    }
   </style>
 </head>
 
@@ -316,6 +123,19 @@ getScores();
   <div id="scoresList">Loading...</div>
 </div>
 
+<div id="scoreModal" class="score-modal">
+  <div class="score-box">
+    <h2>🏆 New Score!</h2>
+    <p>You scored <strong id="finalScore">0</strong></p>
+    <p>Enter your name:</p>
+    <input id="playerName" type="text" maxlength="20" placeholder="Your name" />
+    <div class="score-actions">
+      <button onclick="submitPlayerScore()">Save Score</button>
+      <button onclick="skipScore()">Skip</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -325,6 +145,7 @@ let bullets = [];
 let enemies = [];
 let score = 0;
 let gameOver = false;
+let scoreModalOpen = false;
 
 const enemyEmojis = ["🐄", "🐖", "🐔"];
 
@@ -346,22 +167,22 @@ document.addEventListener("touchmove", e => {
   movePlayer(e.touches[0].clientX);
 }, { passive: false });
 
-document.addEventListener("click", () => {
-  if (!gameOver) {
+function shoot() {
+  if (!gameOver && !scoreModalOpen) {
     bullets.push({ x: playerX + 10, y: 550 });
   }
-});
+}
+
+document.addEventListener("click", shoot);
 
 document.addEventListener("touchstart", e => {
   e.preventDefault();
-
-  if (!gameOver) {
-    bullets.push({ x: playerX + 10, y: 550 });
-  }
+  movePlayer(e.touches[0].clientX);
+  shoot();
 }, { passive: false });
 
 function spawnEnemy() {
-  if (!gameOver) {
+  if (!gameOver && !scoreModalOpen) {
     enemies.push({
       x: Math.random() * 360,
       y: 0,
@@ -379,17 +200,14 @@ function draw() {
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 15, 30);
 
-  // player cowboy
   ctx.font = "32px serif";
   ctx.fillText("🤠", playerX - 6, 580);
 
-  // bullets
   ctx.font = "20px serif";
   bullets.forEach(b => {
     ctx.fillText("💥", b.x - 7, b.y);
   });
 
-  // animal enemies
   ctx.font = "30px serif";
   enemies.forEach(e => {
     ctx.fillText(e.emoji, e.x, e.y + 24);
@@ -399,13 +217,11 @@ function draw() {
     ctx.fillStyle = "white";
     ctx.font = "32px Arial";
     ctx.fillText("Game Over", 115, 280);
-    ctx.font = "18px Arial";
-    ctx.fillText("Refresh to play again", 120, 315);
   }
 }
 
 function update() {
-  if (gameOver) return;
+  if (gameOver || scoreModalOpen) return;
 
   bullets.forEach(b => b.y -= 6);
   enemies.forEach(e => e.y += 2);
@@ -439,11 +255,39 @@ function endGame() {
 
   if (score <= 0) return;
 
-  const name = prompt("Enter your name:");
+  scoreModalOpen = true;
+  document.getElementById("finalScore").textContent = score;
+  document.getElementById("scoreModal").style.display = "flex";
+
+  setTimeout(() => {
+    document.getElementById("playerName").focus();
+  }, 100);
+}
+
+function submitPlayerScore() {
+  const name = document.getElementById("playerName").value.trim();
+
   if (!name) return;
 
   saveScore(name, score);
+  closeScoreModal();
 }
+
+function skipScore() {
+  closeScoreModal();
+}
+
+function closeScoreModal() {
+  document.getElementById("scoreModal").style.display = "none";
+  document.getElementById("playerName").value = "";
+  scoreModalOpen = false;
+}
+
+document.getElementById("playerName").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    submitPlayerScore();
+  }
+});
 
 function loop() {
   update();
