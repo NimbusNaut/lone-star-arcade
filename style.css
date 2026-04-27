@@ -310,3 +310,25 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.arcade-footer {
+  text-align: center;
+  margin-top: 60px;
+  padding: 20px 10px 10px;
+  font-size: 14px;
+  color: rgba(244,241,236,0.7);
+  letter-spacing: 0.5px;
+}
+
+.arcade-footer a {
+  color: #F4F1EC;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+}
+
+.arcade-footer a:hover {
+  color: #BF2F2F;
+  text-shadow: 0 0 8px rgba(191,47,47,0.8);
+}
