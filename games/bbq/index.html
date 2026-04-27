@@ -13,6 +13,7 @@
       color: white;
       font-family: Arial, sans-serif;
       overflow: hidden;
+      touch-action: none;
     }
 
     canvas {
@@ -57,14 +58,23 @@ let foodX = Math.random() * 350;
 let score = 0;
 let gameOver = false;
 
-document.addEventListener("mousemove", e => {
+function moveBasket(clientX) {
   const rect = canvas.getBoundingClientRect();
-  basketX = e.clientX - rect.left - 45;
+  const scaleX = canvas.width / rect.width;
+  basketX = (clientX - rect.left) * scaleX - 45;
 
-  // keep basket in bounds
   if (basketX < 0) basketX = 0;
   if (basketX > 310) basketX = 310;
+}
+
+document.addEventListener("mousemove", e => {
+  moveBasket(e.clientX);
 });
+
+document.addEventListener("touchmove", e => {
+  e.preventDefault();
+  moveBasket(e.touches[0].clientX);
+}, { passive: false });
 
 function draw() {
   ctx.clearRect(0, 0, 400, 600);
