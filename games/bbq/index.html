@@ -11,14 +11,16 @@
       align-items: center;
       height: 100vh;
       color: white;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
     }
+
     canvas {
       background: #1F3A5F;
       border: 4px solid white;
     }
   </style>
 </head>
+
 <body>
 
 <canvas id="game" width="400" height="600"></canvas>
@@ -32,6 +34,7 @@ let foodY = 0;
 let foodX = Math.random() * 350;
 
 let score = 0;
+let gameOver = false;
 
 document.addEventListener("mousemove", e => {
   const rect = canvas.getBoundingClientRect();
@@ -39,34 +42,55 @@ document.addEventListener("mousemove", e => {
 });
 
 function draw() {
-  ctx.clearRect(0,0,400,600);
+  ctx.clearRect(0, 0, 400, 600);
+
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.fillText("Score: " + score, 10, 25);
 
   // basket
-  ctx.fillStyle = "white";
   ctx.fillRect(basketX, 550, 80, 20);
 
   // food
   ctx.beginPath();
-  ctx.arc(foodX, foodY, 10, 0, Math.PI*2);
+  ctx.arc(foodX, foodY, 10, 0, Math.PI * 2);
   ctx.fill();
 
-  // score
-  ctx.fillText("Score: " + score, 10, 20);
+  if (gameOver) {
+    ctx.font = "32px Arial";
+    ctx.fillText("Game Over", 110, 280);
+    ctx.font = "18px Arial";
+    ctx.fillText("Refresh to play again", 105, 315);
+  }
 }
 
 function update() {
+  if (gameOver) return;
+
   foodY += 4;
 
+  // caught
   if (foodY > 550 && foodX > basketX && foodX < basketX + 80) {
     score++;
     foodY = 0;
     foodX = Math.random() * 350;
   }
 
+  // missed = game over
   if (foodY > 600) {
-    foodY = 0;
-    foodX = Math.random() * 350;
+    endGame();
   }
+}
+
+function endGame() {
+  gameOver = true;
+
+  if (score <= 0) return;
+
+  const name = prompt("Enter your name:");
+  if (!name) return;
+
+  saveScore(name, score);
 }
 
 function loop() {
@@ -74,7 +98,46 @@ function loop() {
   draw();
 }
 
-setInterval(loop, 1000/60);
+setInterval(loop, 1000 / 60);
+</script>
+
+<!-- 🔥 FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, push, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
+  authDomain: "lone-star-arcade.firebaseapp.com",
+  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
+  projectId: "lone-star-arcade",
+  storageBucket: "lone-star-arcade.firebasestorage.app",
+  messagingSenderId: "883063669150",
+  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.saveScore = function(name, score) {
+  push(ref(db, "scores/bbq"), {
+    name,
+    score,
+    time: Date.now()
+  });
+}
+
+window.getScores = async function() {
+  const q = query(ref(db, "scores/bbq"), orderByChild("score"), limitToLast(10));
+  const snapshot = await get(q);
+
+  const scores = [];
+  snapshot.forEach(child => {
+    scores.push(child.val());
+  });
+
+  console.log(scores.reverse());
+}
 </script>
 
 </body>
