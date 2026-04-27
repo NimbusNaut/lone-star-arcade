@@ -7,19 +7,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-B45GQ3KZ3X');
-</script>
-  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B45GQ3KZ3X');
+  </script>
 </head>
-<body>
 
+<body>
   <div class="arcade-room">
     <div class="brand">Lone Star Guide</div>
 
@@ -32,7 +29,13 @@
     <div class="machines">
       <div class="cabinet orange" onclick="launchGame('games/pong/index.html')">
         <div class="marquee">Texas Pong</div>
-        <div class="screen">🏓</div>
+        <div class="screen">
+          <div class="screen-icon">🏓</div>
+          <div class="mini-board">
+            <strong>Top Scores</strong>
+            <div id="pongScores">Loading...</div>
+          </div>
+        </div>
         <div class="controls">
           <span></span><button></button><button></button>
         </div>
@@ -41,7 +44,13 @@
 
       <div class="cabinet red" onclick="launchGame('games/bbq/index.html')">
         <div class="marquee">BBQ Dash</div>
-        <div class="screen">🍖</div>
+        <div class="screen">
+          <div class="screen-icon">🍖</div>
+          <div class="mini-board">
+            <strong>Top Scores</strong>
+            <div id="bbqScores">Loading...</div>
+          </div>
+        </div>
         <div class="controls">
           <span></span><button></button><button></button>
         </div>
@@ -50,7 +59,13 @@
 
       <div class="cabinet blue" onclick="launchGame('games/shooter/index.html')">
         <div class="marquee">Bluebonnet Blaster</div>
-        <div class="screen">💙</div>
+        <div class="screen">
+          <div class="screen-icon">💙</div>
+          <div class="mini-board">
+            <strong>Top Scores</strong>
+            <div id="shooterScores">Loading...</div>
+          </div>
+        </div>
         <div class="controls">
           <span></span><button></button><button></button>
         </div>
@@ -66,6 +81,6 @@
     <iframe id="gameFrame"></iframe>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
