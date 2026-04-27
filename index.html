@@ -1,86 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lone Star Arcade</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B45GQ3KZ3X');
-  </script>
-</head>
+const firebaseConfig = {
+  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
+  authDomain: "lone-star-arcade.firebaseapp.com",
+  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
+  projectId: "lone-star-arcade",
+  storageBucket: "lone-star-arcade.firebasestorage.app",
+  messagingSenderId: "883063669150",
+  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
+};
 
-<body>
-  <div class="arcade-room">
-    <div class="brand">Lone Star Guide</div>
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    <div class="neon-sign">
-      <div class="star">★</div>
-      <h1>Lone Star<br><span>Arcade</span></h1>
-      <p>Texas-sized mini games</p>
-    </div>
+window.launchGame = function(url) {
+  if (typeof gtag === "function") {
+    let gameName = "unknown";
 
-    <div class="machines">
-      <div class="cabinet orange" onclick="launchGame('games/pong/index.html')">
-        <div class="marquee">Texas Pong</div>
-        <div class="screen">
-          <div class="screen-icon">🏓</div>
-          <div class="mini-board">
-            <strong>Top Scores</strong>
-            <div id="pongScores">Loading...</div>
-          </div>
-        </div>
-        <div class="controls">
-          <span></span><button></button><button></button>
-        </div>
-        <div class="base"></div>
-      </div>
+    if (url.includes("pong")) gameName = "pong";
+    if (url.includes("bbq")) gameName = "bbq";
+    if (url.includes("shooter")) gameName = "shooter";
 
-      <div class="cabinet red" onclick="launchGame('games/bbq/index.html')">
-        <div class="marquee">BBQ Dash</div>
-        <div class="screen">
-          <div class="screen-icon">🍖</div>
-          <div class="mini-board">
-            <strong>Top Scores</strong>
-            <div id="bbqScores">Loading...</div>
-          </div>
-        </div>
-        <div class="controls">
-          <span></span><button></button><button></button>
-        </div>
-        <div class="base"></div>
-      </div>
+    gtag("event", "play_game", {
+      game: gameName
+    });
+  }
 
-      <div class="cabinet blue" onclick="launchGame('games/shooter/index.html')">
-        <div class="marquee">Bluebonnet Blaster</div>
-        <div class="screen">
-          <div class="screen-icon">💙</div>
-          <div class="mini-board">
-            <strong>Top Scores</strong>
-            <div id="shooterScores">Loading...</div>
-          </div>
-        </div>
-        <div class="controls">
-          <span></span><button></button><button></button>
-        </div>
-        <div class="base"></div>
-      </div>
-    </div>
+  document.getElementById("gameFrame").src = url;
+  document.getElementById("gameModal").style.display = "flex";
+};
 
-    <div class="floor"></div>
-  </div>
+window.closeGame = function() {
+  document.getElementById("gameModal").style.display = "none";
+  document.getElementById("gameFrame").src = "";
+  loadAllCabinetScores();
+};
 
-  <div id="gameModal" class="modal">
-    <button class="close" onclick="closeGame()">×</button>
-    <iframe id="gameFrame"></iframe>
-  </div>
+async function loadCabinetScores(game, elementId) {
+  const target = document.getElementById(elementId);
 
-  <script type="module" src="script.js"></script>
-</body>
-</html>
+  try {
+    const q = query(ref(db, `scores/${game}`), orderByChild("score"), limitToLast(3));
+    const snapshot = await get(q);
+
+    const scores = [];
+    snapshot.forEach(child => {
+      scores.push(child.val());
+    });
+
+    scores.reverse();
+
+    if (scores.length === 0) {
+      target.innerHTML = "No scores yet";
+      return;
+    }
+
+    target.innerHTML = scores.map((s, i) =>
+      `<div>${i + 1}. ${s.name}: ${s.score}</div>`
+    ).join("");
+  } catch (err) {
+    console.error(err);
+    target.innerHTML = "Scores unavailable";
+  }
+}
+
+function loadAllCabinetScores() {
+  loadCabinetScores("pong", "pongScores");
+  loadCabinetScores("bbq", "bbqScores");
+  loadCabinetScores("shooter", "shooterScores");
+}
+
+loadAllCabinetScores();
