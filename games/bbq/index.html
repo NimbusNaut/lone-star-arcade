@@ -61,6 +61,7 @@ document.addEventListener("mousemove", e => {
   const rect = canvas.getBoundingClientRect();
   basketX = e.clientX - rect.left - 45;
 
+  // keep basket in bounds
   if (basketX < 0) basketX = 0;
   if (basketX > 310) basketX = 310;
 });
@@ -72,8 +73,10 @@ function draw() {
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 10, 25);
 
+  // basket (slightly bigger)
   ctx.fillRect(basketX, 545, 90, 25);
 
+  // falling food
   ctx.beginPath();
   ctx.arc(foodX, foodY, 10, 0, Math.PI * 2);
   ctx.fill();
@@ -91,16 +94,17 @@ function update() {
 
   foodY += 3;
 
-  const catchZoneTop = 525;
-  const catchZoneBottom = 575;
-  const catchZoneLeft = basketX - 30;
-  const catchZoneRight = basketX + 120;
+  // 🔥 SIMPLE + RELIABLE CATCH LOGIC
+  const ballBottom = foodY + 10;
+
+  const basketTop = 545;
+  const basketLeft = basketX;
+  const basketRight = basketX + 90;
 
   const caught =
-    foodY >= catchZoneTop &&
-    foodY <= catchZoneBottom &&
-    foodX >= catchZoneLeft &&
-    foodX <= catchZoneRight;
+    ballBottom >= basketTop &&
+    foodX >= basketLeft &&
+    foodX <= basketRight;
 
   if (caught) {
     score++;
