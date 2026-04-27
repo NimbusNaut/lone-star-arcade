@@ -2,16 +2,16 @@
 <html>
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B45GQ3KZ3X');
+  </script>
 
-  gtag('config', 'G-B45GQ3KZ3X');
-</script>
-  
   <title>BBQ Dash</title>
+
   <style>
     body {
       margin: 0;
@@ -67,9 +67,13 @@ let foodY = -20;
 let foodX = Math.random() * 350;
 let score = 0;
 let gameOver = false;
-let foodSpeed = 7;
-let speedIncrease = 1.25;
-let maxFoodSpeed = 22;
+
+let foodSpeed = 5;
+let speedIncrease = 1;
+let maxFoodSpeed = 12;
+
+let meatEmoji = "🍖";
+const meats = ["🍖", "🍗", "🥩", "🌭"];
 
 function moveBasket(clientX) {
   const rect = canvas.getBoundingClientRect();
@@ -94,17 +98,17 @@ function draw() {
 
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
+  ctx.fillText("Score: " + score, 10, 25);
   ctx.fillText("Speed: " + foodSpeed.toFixed(1), 10, 50);
 
-  // basket (slightly bigger)
-ctx.font = "48px serif";
-ctx.fillText("🤠", basketX, 575);
+  ctx.font = "48px serif";
+  ctx.fillText("🤠", basketX, 575);
 
-  // falling food
- ctx.font = "40px serif";
-ctx.fillText("🍖", foodX - 12, foodY + 10);
+  ctx.font = "32px serif";
+  ctx.fillText(meatEmoji, foodX - 12, foodY + 10);
 
   if (gameOver) {
+    ctx.fillStyle = "white";
     ctx.font = "32px Arial";
     ctx.fillText("Game Over", 110, 280);
     ctx.font = "18px Arial";
@@ -112,30 +116,47 @@ ctx.fillText("🍖", foodX - 12, foodY + 10);
   }
 }
 
+function chooseNewMeat() {
+  let newMeat;
+
+  do {
+    newMeat = meats[Math.floor(Math.random() * meats.length)];
+  } while (newMeat === meatEmoji);
+
+  meatEmoji = newMeat;
+}
+
 function update() {
   if (gameOver) return;
 
   foodY += foodSpeed;
 
-  // 🔥 SIMPLE + RELIABLE CATCH LOGIC
   const foodHeight = 24;
-const ballBottom = foodY + foodHeight;
+  const ballBottom = foodY + foodHeight;
   const basketTop = 545;
   const basketLeft = basketX;
-  const basketRight = basketX + 50;
+  const basketRight = basketX + 55;
 
   const caught =
     ballBottom >= basketTop &&
     foodX >= basketLeft &&
     foodX <= basketRight;
 
-if (caught) {
-  score++;
-  foodSpeed = Math.min(foodSpeed + speedIncrease, maxFoodSpeed);
-  foodY = -20;
-  foodX = Math.random() * 350;
-  return;
-}
+  if (caught) {
+    score++;
+
+    if (score % 10 === 0) {
+      foodSpeed = Math.min(foodSpeed + speedIncrease, maxFoodSpeed);
+    }
+
+    if (score % 30 === 0) {
+      chooseNewMeat();
+    }
+
+    foodY = -20;
+    foodX = Math.random() * 350;
+    return;
+  }
 
   if (foodY > 620) {
     endGame();
