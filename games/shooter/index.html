@@ -12,11 +12,28 @@
       height: 100vh;
       font-family: Arial, sans-serif;
       color: white;
+      overflow: hidden;
     }
 
     canvas {
       background: black;
       border: 4px solid #6F7D5C;
+    }
+
+    #leaderboard {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 12px;
+      border-radius: 8px;
+      width: 200px;
+      font-size: 14px;
+    }
+
+    #leaderboard strong {
+      display: block;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -24,6 +41,11 @@
 <body>
 
 <canvas id="game" width="400" height="600"></canvas>
+
+<div id="leaderboard">
+  <strong>🏆 Top Scores</strong>
+  <div id="scoresList">Loading...</div>
+</div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -61,16 +83,13 @@ function draw() {
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 15, 30);
 
-  // player
   ctx.fillStyle = "white";
   ctx.fillRect(playerX, 560, 20, 20);
 
-  // bullets
   bullets.forEach(b => {
     ctx.fillRect(b.x, b.y, 4, 10);
   });
 
-  // enemies
   ctx.fillStyle = "#BF2F2F";
   enemies.forEach(e => {
     ctx.fillRect(e.x, e.y, 20, 20);
@@ -121,7 +140,6 @@ function endGame() {
   if (score <= 0) return;
 
   const name = prompt("Enter your name:");
-
   if (!name) return;
 
   saveScore(name, score);
@@ -157,20 +175,41 @@ window.saveScore = function(name, score) {
     name,
     score,
     time: Date.now()
+  }).then(() => {
+    getScores();
   });
-}
+};
 
 window.getScores = async function() {
-  const q = query(ref(db, "scores/shooter"), orderByChild("score"), limitToLast(10));
-  const snapshot = await get(q);
+  const list = document.getElementById("scoresList");
 
-  const scores = [];
-  snapshot.forEach(child => {
-    scores.push(child.val());
-  });
+  try {
+    const q = query(ref(db, "scores/shooter"), orderByChild("score"), limitToLast(10));
+    const snapshot = await get(q);
 
-  console.log(scores.reverse());
-}
+    const scores = [];
+    snapshot.forEach(child => {
+      scores.push(child.val());
+    });
+
+    scores.reverse();
+
+    if (scores.length === 0) {
+      list.innerHTML = "No scores yet";
+      return;
+    }
+
+    list.innerHTML = scores.map((s, i) =>
+      `<div>${i + 1}. ${s.name}: ${s.score}</div>`
+    ).join("");
+
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = "⚠️ Error loading scores";
+  }
+};
+
+getScores();
 </script>
 
 </body>
