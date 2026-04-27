@@ -52,14 +52,17 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let basketX = 150;
-let foodY = 0;
+let foodY = -20;
 let foodX = Math.random() * 350;
 let score = 0;
 let gameOver = false;
 
 document.addEventListener("mousemove", e => {
   const rect = canvas.getBoundingClientRect();
-  basketX = e.clientX - rect.left - 40;
+  basketX = e.clientX - rect.left - 45;
+
+  if (basketX < 0) basketX = 0;
+  if (basketX > 310) basketX = 310;
 });
 
 function draw() {
@@ -69,7 +72,7 @@ function draw() {
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 10, 25);
 
-  ctx.fillRect(basketX, 550, 80, 20);
+  ctx.fillRect(basketX, 545, 90, 25);
 
   ctx.beginPath();
   ctx.arc(foodX, foodY, 10, 0, Math.PI * 2);
@@ -88,26 +91,25 @@ function update() {
 
   foodY += 3;
 
-  const foodRadius = 10;
-  const basketY = 550;
-  const basketHeight = 20;
-  const basketWidth = 80;
-  const catchPadding = 18;
+  const catchZoneTop = 525;
+  const catchZoneBottom = 575;
+  const catchZoneLeft = basketX - 30;
+  const catchZoneRight = basketX + 120;
 
   const caught =
-    foodY + foodRadius >= basketY - catchPadding &&
-    foodY - foodRadius <= basketY + basketHeight &&
-    foodX + foodRadius >= basketX &&
-    foodX - foodRadius <= basketX + basketWidth;
+    foodY >= catchZoneTop &&
+    foodY <= catchZoneBottom &&
+    foodX >= catchZoneLeft &&
+    foodX <= catchZoneRight;
 
   if (caught) {
     score++;
-    foodY = 0;
+    foodY = -20;
     foodX = Math.random() * 350;
     return;
   }
 
-  if (foodY - foodRadius > 600) {
+  if (foodY > 620) {
     endGame();
   }
 }
