@@ -3,7 +3,7 @@ function launchGame(url) {
   const frame = document.getElementById("gameFrame");
 
   frame.src = url;
-  modal.style.display = "block";
+  modal.style.display = "flex";
 }
 
 function closeGame() {
