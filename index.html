@@ -2,47 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lone Star Arcade</title>
-
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <header class="header">
-    🤠 Lone Star Arcade
-  </header>
+  <div class="arcade-room">
+    <div class="brand">Lone Star Guide</div>
 
-  <main class="arcade">
-
-    <div class="cabinet">
-      <h2>Texas Pong</h2>
-      <button onclick="launchGame('games/pong/index.html')">Play</button>
+    <div class="neon-sign">
+      <div class="star">★</div>
+      <h1>Lone Star<br><span>Arcade</span></h1>
+      <p>Texas-sized mini games</p>
     </div>
 
-    <div class="cabinet">
-      <h2>BBQ Dash</h2>
-      <button onclick="launchGame('games/bbq/index.html')">Play</button>
+    <div class="machines">
+      <div class="cabinet orange" onclick="launchGame('games/pong/index.html')">
+        <div class="marquee">Texas Pong</div>
+        <div class="screen">🏓</div>
+        <div class="controls">
+          <span></span><button></button><button></button>
+        </div>
+        <div class="base"></div>
+      </div>
+
+      <div class="cabinet red" onclick="launchGame('games/bbq/index.html')">
+        <div class="marquee">BBQ Dash</div>
+        <div class="screen">🍖</div>
+        <div class="controls">
+          <span></span><button></button><button></button>
+        </div>
+        <div class="base"></div>
+      </div>
+
+      <div class="cabinet blue" onclick="launchGame('games/shooter/index.html')">
+        <div class="marquee">Bluebonnet Blaster</div>
+        <div class="screen">💙</div>
+        <div class="controls">
+          <span></span><button></button><button></button>
+        </div>
+        <div class="base"></div>
+      </div>
     </div>
 
-    <div class="cabinet">
-      <h2>Bluebonnet Blaster</h2>
-      <button onclick="launchGame('games/shooter/index.html')">Play</button>
-    </div>
+    <div class="floor"></div>
+  </div>
 
-  </main>
-
-  <!-- Game Modal -->
   <div id="gameModal" class="modal">
-    <span class="close" onclick="closeGame()">✕</span>
+    <button class="close" onclick="closeGame()">×</button>
     <iframe id="gameFrame"></iframe>
   </div>
 
   <script src="script.js"></script>
-  
-
 </body>
 </html>
