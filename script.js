@@ -1,4 +1,20 @@
-function launchGame(url) {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
+  authDomain: "lone-star-arcade.firebaseapp.com",
+  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
+  projectId: "lone-star-arcade",
+  storageBucket: "lone-star-arcade.firebasestorage.app",
+  messagingSenderId: "883063669150",
+  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.launchGame = function(url) {
   if (typeof gtag === "function") {
     let gameName = "unknown";
 
@@ -11,17 +27,49 @@ function launchGame(url) {
     });
   }
 
-  const modal = document.getElementById("gameModal");
-  const frame = document.getElementById("gameFrame");
+  document.getElementById("gameFrame").src = url;
+  document.getElementById("gameModal").style.display = "flex";
+};
 
-  frame.src = url;
-  modal.style.display = "flex";
+window.closeGame = function() {
+  document.getElementById("gameModal").style.display = "none";
+  document.getElementById("gameFrame").src = "";
+  loadAllCabinetScores();
+};
+
+async function loadCabinetScores(game, elementId) {
+  const target = document.getElementById(elementId);
+
+  try {
+    const q = query(ref(db, `scores/${game}`), orderByChild("score"), limitToLast(3));
+    const snapshot = await get(q);
+
+    const scores = [];
+    snapshot.forEach(child => {
+      scores.push(child.val());
+    });
+
+    scores.reverse();
+
+    if (scores.length === 0) {
+      target.innerHTML = "No scores yet";
+      return;
+    }
+
+    target.innerHTML = scores.map((s, i) =>
+      `<div>${i + 1}. ${s.name}: ${s.score}</div>`
+    ).join("");
+
+  } catch (err) {
+    console.error(err);
+    target.innerHTML = "Scores unavailable";
+  }
 }
 
-function closeGame() {
-  const modal = document.getElementById("gameModal");
-  const frame = document.getElementById("gameFrame");
-
-  modal.style.display = "none";
-  frame.src = "";
+function loadAllCabinetScores() {
+  loadCabinetScores("pong", "pongScores");
+  loadCabinetScores("bbq", "bbqScores");
+  loadCabinetScores("shooter", "shooterScores");
 }
+
+loadAllCabinetScores();
