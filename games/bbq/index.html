@@ -57,8 +57,9 @@ let foodY = -20;
 let foodX = Math.random() * 350;
 let score = 0;
 let gameOver = false;
-let foodSpeed = 3;
-let speedIncrease = 0.25;
+let foodSpeed = 4;
+let speedIncrease = 0.6;
+let maxFoodSpeed = 12;
 
 function moveBasket(clientX) {
   const rect = canvas.getBoundingClientRect();
@@ -120,7 +121,7 @@ function update() {
 
 if (caught) {
   score++;
-  foodSpeed += speedIncrease;
+  foodSpeed = Math.min(foodSpeed + speedIncrease, maxFoodSpeed);
   foodY = -20;
   foodX = Math.random() * 350;
   return;
