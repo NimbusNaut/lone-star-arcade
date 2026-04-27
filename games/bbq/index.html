@@ -97,7 +97,8 @@ function draw() {
   ctx.fillText("Speed: " + foodSpeed.toFixed(1), 10, 50);
 
   // basket (slightly bigger)
-  ctx.fillRect(basketX, 545, 90, 25);
+ctx.font = "48px serif";
+ctx.fillText("🤠", basketX, 575);
 
   // falling food
   ctx.beginPath();
@@ -121,8 +122,8 @@ function update() {
   const ballBottom = foodY + 10;
 
   const basketTop = 545;
-  const basketLeft = basketX + 5;
-  const basketRight = basketX + 85;
+  const basketLeft = basketX;
+  const basketRight = basketX + 50;
 
   const caught =
     ballBottom >= basketTop &&
