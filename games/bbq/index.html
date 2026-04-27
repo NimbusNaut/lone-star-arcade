@@ -57,6 +57,8 @@ let foodY = -20;
 let foodX = Math.random() * 350;
 let score = 0;
 let gameOver = false;
+let foodSpeed = 3;
+let speedIncrease = 0.25;
 
 function moveBasket(clientX) {
   const rect = canvas.getBoundingClientRect();
@@ -102,7 +104,7 @@ function draw() {
 function update() {
   if (gameOver) return;
 
-  foodY += 3;
+  foodY += foodSpeed;
 
   // 🔥 SIMPLE + RELIABLE CATCH LOGIC
   const ballBottom = foodY + 10;
@@ -116,12 +118,13 @@ function update() {
     foodX >= basketLeft &&
     foodX <= basketRight;
 
-  if (caught) {
-    score++;
-    foodY = -20;
-    foodX = Math.random() * 350;
-    return;
-  }
+if (caught) {
+  score++;
+  foodSpeed += speedIncrease;
+  foodY = -20;
+  foodX = Math.random() * 350;
+  return;
+}
 
   if (foodY > 620) {
     endGame();
