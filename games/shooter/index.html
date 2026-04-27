@@ -2,9 +2,87 @@
 <html>
 <head>
   <title>Bluebonnet Blaster</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1F3A5F;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      background: black;
+      border: 4px solid #6F7D5C;
+    }
+  </style>
 </head>
-<body style="margin:0;background:#1F3A5F;color:white;font-family:Arial;text-align:center;padding:80px;">
-  <h1>💙 Bluebonnet Blaster</h1>
-  <p>Protect the field from tumbleweeds. Coming soon.</p>
+<body>
+
+<canvas id="game" width="400" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let playerX = 180;
+let bullets = [];
+let enemies = [];
+
+document.addEventListener("mousemove", e => {
+  const rect = canvas.getBoundingClientRect();
+  playerX = e.clientX - rect.left - 10;
+});
+
+document.addEventListener("click", () => {
+  bullets.push({x: playerX + 10, y: 550});
+});
+
+function spawnEnemy() {
+  enemies.push({x: Math.random()*380, y: 0});
+}
+
+setInterval(spawnEnemy, 1000);
+
+function draw() {
+  ctx.clearRect(0,0,400,600);
+
+  // player
+  ctx.fillStyle = "white";
+  ctx.fillRect(playerX, 560, 20, 20);
+
+  // bullets
+  bullets.forEach(b => {
+    ctx.fillRect(b.x, b.y, 4, 10);
+  });
+
+  // enemies
+  ctx.fillStyle = "red";
+  enemies.forEach(e => {
+    ctx.fillRect(e.x, e.y, 20, 20);
+  });
+}
+
+function update() {
+  bullets.forEach(b => b.y -= 5);
+  enemies.forEach(e => e.y += 2);
+
+  // collision
+  enemies = enemies.filter(e => {
+    return !bullets.some(b =>
+      b.x > e.x && b.x < e.x+20 &&
+      b.y > e.y && b.y < e.y+20
+    );
+  });
+}
+
+function loop() {
+  update();
+  draw();
+}
+
+setInterval(loop, 1000/60);
+</script>
+
 </body>
 </html>
