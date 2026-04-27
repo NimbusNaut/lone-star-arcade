@@ -10,13 +10,17 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
     }
+
     canvas {
       background: black;
       border: 4px solid #6F7D5C;
     }
   </style>
 </head>
+
 <body>
 
 <canvas id="game" width="400" height="600"></canvas>
@@ -28,6 +32,8 @@ const ctx = canvas.getContext("2d");
 let playerX = 180;
 let bullets = [];
 let enemies = [];
+let score = 0;
+let gameOver = false;
 
 document.addEventListener("mousemove", e => {
   const rect = canvas.getBoundingClientRect();
@@ -35,17 +41,25 @@ document.addEventListener("mousemove", e => {
 });
 
 document.addEventListener("click", () => {
-  bullets.push({x: playerX + 10, y: 550});
+  if (!gameOver) {
+    bullets.push({ x: playerX + 10, y: 550 });
+  }
 });
 
 function spawnEnemy() {
-  enemies.push({x: Math.random()*380, y: 0});
+  if (!gameOver) {
+    enemies.push({ x: Math.random() * 380, y: 0 });
+  }
 }
 
 setInterval(spawnEnemy, 1000);
 
 function draw() {
-  ctx.clearRect(0,0,400,600);
+  ctx.clearRect(0, 0, 400, 600);
+
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.fillText("Score: " + score, 15, 30);
 
   // player
   ctx.fillStyle = "white";
@@ -57,23 +71,60 @@ function draw() {
   });
 
   // enemies
-  ctx.fillStyle = "red";
+  ctx.fillStyle = "#BF2F2F";
   enemies.forEach(e => {
     ctx.fillRect(e.x, e.y, 20, 20);
   });
+
+  if (gameOver) {
+    ctx.fillStyle = "white";
+    ctx.font = "32px Arial";
+    ctx.fillText("Game Over", 115, 280);
+    ctx.font = "18px Arial";
+    ctx.fillText("Refresh to play again", 120, 315);
+  }
 }
 
 function update() {
+  if (gameOver) return;
+
   bullets.forEach(b => b.y -= 5);
   enemies.forEach(e => e.y += 2);
 
-  // collision
+  bullets = bullets.filter(b => b.y > 0);
+
   enemies = enemies.filter(e => {
-    return !bullets.some(b =>
-      b.x > e.x && b.x < e.x+20 &&
-      b.y > e.y && b.y < e.y+20
+    const hit = bullets.some(b =>
+      b.x > e.x &&
+      b.x < e.x + 20 &&
+      b.y > e.y &&
+      b.y < e.y + 20
     );
+
+    if (hit) {
+      score++;
+      return false;
+    }
+
+    if (e.y > 580) {
+      endGame();
+      return false;
+    }
+
+    return true;
   });
+}
+
+function endGame() {
+  gameOver = true;
+
+  if (score <= 0) return;
+
+  const name = prompt("Enter your name:");
+
+  if (!name) return;
+
+  saveScore(name, score);
 }
 
 function loop() {
@@ -81,7 +132,45 @@ function loop() {
   draw();
 }
 
-setInterval(loop, 1000/60);
+setInterval(loop, 1000 / 60);
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, push, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
+  authDomain: "lone-star-arcade.firebaseapp.com",
+  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
+  projectId: "lone-star-arcade",
+  storageBucket: "lone-star-arcade.firebasestorage.app",
+  messagingSenderId: "883063669150",
+  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.saveScore = function(name, score) {
+  push(ref(db, "scores/shooter"), {
+    name,
+    score,
+    time: Date.now()
+  });
+}
+
+window.getScores = async function() {
+  const q = query(ref(db, "scores/shooter"), orderByChild("score"), limitToLast(10));
+  const snapshot = await get(q);
+
+  const scores = [];
+  snapshot.forEach(child => {
+    scores.push(child.val());
+  });
+
+  console.log(scores.reverse());
+}
 </script>
 
 </body>
