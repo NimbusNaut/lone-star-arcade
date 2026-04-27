@@ -101,9 +101,8 @@ ctx.font = "48px serif";
 ctx.fillText("🤠", basketX, 575);
 
   // falling food
-  ctx.beginPath();
-  ctx.arc(foodX, foodY, 10, 0, Math.PI * 2);
-  ctx.fill();
+ ctx.font = "40px serif";
+ctx.fillText("🍖", foodX - 12, foodY + 10);
 
   if (gameOver) {
     ctx.font = "32px Arial";
@@ -119,8 +118,8 @@ function update() {
   foodY += foodSpeed;
 
   // 🔥 SIMPLE + RELIABLE CATCH LOGIC
-  const ballBottom = foodY + 10;
-
+  const foodHeight = 24;
+const ballBottom = foodY + foodHeight;
   const basketTop = 545;
   const basketLeft = basketX;
   const basketRight = basketX + 50;
