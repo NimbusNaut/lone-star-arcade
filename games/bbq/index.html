@@ -57,9 +57,9 @@ let foodY = -20;
 let foodX = Math.random() * 350;
 let score = 0;
 let gameOver = false;
-let foodSpeed = 4;
-let speedIncrease = 0.6;
-let maxFoodSpeed = 12;
+let foodSpeed = 7;
+let speedIncrease = 1.25;
+let maxFoodSpeed = 22;
 
 function moveBasket(clientX) {
   const rect = canvas.getBoundingClientRect();
@@ -84,7 +84,7 @@ function draw() {
 
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
-  ctx.fillText("Score: " + score, 10, 25);
+  ctx.fillText("Speed: " + foodSpeed.toFixed(1), 10, 50);
 
   // basket (slightly bigger)
   ctx.fillRect(basketX, 545, 90, 25);
@@ -111,8 +111,8 @@ function update() {
   const ballBottom = foodY + 10;
 
   const basketTop = 545;
-  const basketLeft = basketX;
-  const basketRight = basketX + 90;
+  const basketLeft = basketX + 5;
+  const basketRight = basketX + 85;
 
   const caught =
     ballBottom >= basketTop &&
