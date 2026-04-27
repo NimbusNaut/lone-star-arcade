@@ -12,11 +12,28 @@
       height: 100vh;
       color: white;
       font-family: Arial, sans-serif;
+      overflow: hidden;
     }
 
     canvas {
       background: #1F3A5F;
       border: 4px solid white;
+    }
+
+    #leaderboard {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 12px;
+      border-radius: 8px;
+      width: 200px;
+      font-size: 14px;
+    }
+
+    #leaderboard strong {
+      display: block;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -25,6 +42,11 @@
 
 <canvas id="game" width="400" height="600"></canvas>
 
+<div id="leaderboard">
+  <strong>🏆 Top Scores</strong>
+  <div id="scoresList">Loading...</div>
+</div>
+
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -32,7 +54,6 @@ const ctx = canvas.getContext("2d");
 let basketX = 150;
 let foodY = 0;
 let foodX = Math.random() * 350;
-
 let score = 0;
 let gameOver = false;
 
@@ -48,10 +69,8 @@ function draw() {
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 10, 25);
 
-  // basket
   ctx.fillRect(basketX, 550, 80, 20);
 
-  // food
   ctx.beginPath();
   ctx.arc(foodX, foodY, 10, 0, Math.PI * 2);
   ctx.fill();
@@ -69,14 +88,12 @@ function update() {
 
   foodY += 4;
 
-  // caught
   if (foodY > 550 && foodX > basketX && foodX < basketX + 80) {
     score++;
     foodY = 0;
     foodX = Math.random() * 350;
   }
 
-  // missed = game over
   if (foodY > 600) {
     endGame();
   }
@@ -101,7 +118,6 @@ function loop() {
 setInterval(loop, 1000 / 60);
 </script>
 
-<!-- 🔥 FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getDatabase, ref, push, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
@@ -124,20 +140,41 @@ window.saveScore = function(name, score) {
     name,
     score,
     time: Date.now()
+  }).then(() => {
+    getScores();
   });
-}
+};
 
 window.getScores = async function() {
-  const q = query(ref(db, "scores/bbq"), orderByChild("score"), limitToLast(10));
-  const snapshot = await get(q);
+  const list = document.getElementById("scoresList");
 
-  const scores = [];
-  snapshot.forEach(child => {
-    scores.push(child.val());
-  });
+  try {
+    const q = query(ref(db, "scores/bbq"), orderByChild("score"), limitToLast(10));
+    const snapshot = await get(q);
 
-  console.log(scores.reverse());
-}
+    const scores = [];
+    snapshot.forEach(child => {
+      scores.push(child.val());
+    });
+
+    scores.reverse();
+
+    if (scores.length === 0) {
+      list.innerHTML = "No scores yet";
+      return;
+    }
+
+    list.innerHTML = scores.map((s, i) =>
+      `<div>${i + 1}. ${s.name}: ${s.score}</div>`
+    ).join("");
+
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = "⚠️ Error loading scores";
+  }
+};
+
+getScores();
 </script>
 
 </body>
