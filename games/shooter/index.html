@@ -2,16 +2,16 @@
 <html>
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B45GQ3KZ3X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B45GQ3KZ3X');
+  </script>
 
-  gtag('config', 'G-B45GQ3KZ3X');
-</script>
-  
   <title>Bluebonnet Blaster</title>
+
   <style>
     body {
       margin: 0;
@@ -68,6 +68,8 @@ let enemies = [];
 let score = 0;
 let gameOver = false;
 
+const enemyEmojis = ["🐄", "🐖", "🐔"];
+
 function movePlayer(clientX) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -92,9 +94,21 @@ document.addEventListener("click", () => {
   }
 });
 
+document.addEventListener("touchstart", e => {
+  e.preventDefault();
+
+  if (!gameOver) {
+    bullets.push({ x: playerX + 10, y: 550 });
+  }
+}, { passive: false });
+
 function spawnEnemy() {
   if (!gameOver) {
-    enemies.push({ x: Math.random() * 380, y: 0 });
+    enemies.push({
+      x: Math.random() * 360,
+      y: 0,
+      emoji: enemyEmojis[Math.floor(Math.random() * enemyEmojis.length)]
+    });
   }
 }
 
@@ -107,16 +121,20 @@ function draw() {
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 15, 30);
 
-  ctx.fillStyle = "white";
-  ctx.fillRect(playerX, 560, 20, 20);
+  // player cowboy
+  ctx.font = "32px serif";
+  ctx.fillText("🤠", playerX - 6, 580);
 
+  // bullets
+  ctx.font = "20px serif";
   bullets.forEach(b => {
-    ctx.fillRect(b.x, b.y, 4, 10);
+    ctx.fillText("💥", b.x - 7, b.y);
   });
 
-  ctx.fillStyle = "#BF2F2F";
+  // animal enemies
+  ctx.font = "30px serif";
   enemies.forEach(e => {
-    ctx.fillRect(e.x, e.y, 20, 20);
+    ctx.fillText(e.emoji, e.x, e.y + 24);
   });
 
   if (gameOver) {
@@ -131,7 +149,7 @@ function draw() {
 function update() {
   if (gameOver) return;
 
-  bullets.forEach(b => b.y -= 5);
+  bullets.forEach(b => b.y -= 6);
   enemies.forEach(e => e.y += 2);
 
   bullets = bullets.filter(b => b.y > 0);
@@ -139,9 +157,9 @@ function update() {
   enemies = enemies.filter(e => {
     const hit = bullets.some(b =>
       b.x > e.x &&
-      b.x < e.x + 20 &&
+      b.x < e.x + 32 &&
       b.y > e.y &&
-      b.y < e.y + 20
+      b.y < e.y + 32
     );
 
     if (hit) {
