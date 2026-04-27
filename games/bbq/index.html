@@ -46,28 +46,94 @@
       display: block;
       margin-bottom: 8px;
     }
+
+    .score-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .score-box {
+      background: #1F3A5F;
+      border: 3px solid #F4F1EC;
+      border-radius: 16px;
+      padding: 24px;
+      width: 320px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 0 25px rgba(191,47,47,0.7);
+    }
+
+    .score-box h2 {
+      margin: 0 0 8px;
+      color: #F4F1EC;
+    }
+
+    .score-box p {
+      margin: 6px 0;
+    }
+
+    .score-box input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: 0;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .score-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .score-actions button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .score-actions button:first-child {
+      background: #BF2F2F;
+      color: white;
+    }
+
+    .score-actions button:last-child {
+      background: #F4F1EC;
+      color: #1F3A5F;
+    }
   </style>
 </head>
 
 <body>
-
-  <div id="scoreModal" class="score-modal">
-  <div class="score-box">
-    <h2>🏆 New High Score!</h2>
-    <p>Enter your name:</p>
-    <input id="playerName" type="text" maxlength="20" placeholder="Your name" />
-    <div class="score-actions">
-      <button onclick="submitScore()">Save Score</button>
-      <button onclick="skipScore()">Skip</button>
-    </div>
-  </div>
-</div>
 
 <canvas id="game" width="400" height="600"></canvas>
 
 <div id="leaderboard">
   <strong>🏆 Top Scores</strong>
   <div id="scoresList">Loading...</div>
+</div>
+
+<div id="scoreModal" class="score-modal">
+  <div class="score-box">
+    <h2>🏆 New Score!</h2>
+    <p>You scored <strong id="finalScore">0</strong></p>
+    <p>Enter your name:</p>
+    <input id="playerName" type="text" maxlength="20" placeholder="Your name" />
+    <div class="score-actions">
+      <button onclick="submitPlayerScore()">Save Score</button>
+      <button onclick="skipScore()">Skip</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -123,8 +189,6 @@ function draw() {
     ctx.fillStyle = "white";
     ctx.font = "32px Arial";
     ctx.fillText("Game Over", 110, 280);
-    ctx.font = "18px Arial";
-    ctx.fillText("Refresh to play again", 105, 315);
   }
 }
 
@@ -180,11 +244,36 @@ function endGame() {
 
   if (score <= 0) return;
 
-  const name = prompt("Enter your name:");
+  document.getElementById("finalScore").textContent = score;
+  document.getElementById("scoreModal").style.display = "flex";
+
+  setTimeout(() => {
+    document.getElementById("playerName").focus();
+  }, 100);
+}
+
+function submitPlayerScore() {
+  const name = document.getElementById("playerName").value.trim();
+
   if (!name) return;
 
   saveScore(name, score);
+  closeScoreModal();
 }
+
+function skipScore() {
+  closeScoreModal();
+}
+
+function closeScoreModal() {
+  document.getElementById("scoreModal").style.display = "none";
+}
+
+document.getElementById("playerName").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    submitPlayerScore();
+  }
+});
 
 function loop() {
   update();
