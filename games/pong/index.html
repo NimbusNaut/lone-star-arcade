@@ -1,7 +1,109 @@
 <!DOCTYPE html>
 <html>
-<body style="background:black;color:white;text-align:center;padding:80px;">
-<h1>🏓 Texas Pong</h1>
-<p>This game screen is working.</p>
+<head>
+  <title>Texas Pong</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1F3A5F;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+    canvas {
+      background: black;
+      border: 4px solid #BF2F2F;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="game" width="800" height="400"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let paddleHeight = 80;
+let paddleWidth = 10;
+
+let leftY = 150;
+let rightY = 150;
+
+let ballX = 400;
+let ballY = 200;
+let ballSpeedX = 4;
+let ballSpeedY = 4;
+
+function drawRect(x, y, w, h) {
+  ctx.fillStyle = "white";
+  ctx.fillRect(x, y, w, h);
+}
+
+function drawBall() {
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function moveBall() {
+  ballX += ballSpeedX;
+  ballY += ballSpeedY;
+
+  if (ballY <= 0 || ballY >= canvas.height) {
+    ballSpeedY *= -1;
+  }
+
+  // left paddle collision
+  if (ballX <= 20 && ballY > leftY && ballY < leftY + paddleHeight) {
+    ballSpeedX *= -1;
+  }
+
+  // right paddle collision
+  if (ballX >= 780 && ballY > rightY && ballY < rightY + paddleHeight) {
+    ballSpeedX *= -1;
+  }
+
+  // reset
+  if (ballX < 0 || ballX > canvas.width) {
+    ballX = 400;
+    ballY = 200;
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawRect(10, leftY, paddleWidth, paddleHeight);
+  drawRect(780, rightY, paddleWidth, paddleHeight);
+
+  drawBall();
+}
+
+document.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  leftY = e.clientY - rect.top - paddleHeight / 2;
+});
+
+function aiMove() {
+  if (rightY + paddleHeight / 2 < ballY) {
+    rightY += 3;
+  } else {
+    rightY -= 3;
+  }
+}
+
+function gameLoop() {
+  moveBall();
+  aiMove();
+  draw();
+}
+
+setInterval(gameLoop, 1000 / 60);
+</script>
+
 </body>
 </html>
