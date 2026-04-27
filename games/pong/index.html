@@ -148,10 +148,59 @@ function submitScore() {
 }
 </script>
 
-<!-- 🔥 FIREBASE (CORRECT LOCATION) -->
+<!-- 🔥 FIREBASE LEADERBOARD -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getDatabase, ref, push, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
+  authDomain: "lone-star-arcade.firebaseapp.com",
+  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
+  projectId: "lone-star-arcade",
+  storageBucket: "lone-star-arcade.firebasestorage.app",
+  messagingSenderId: "883063669150",
+  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.saveScore = function(name, score) {
+  push(ref(db, "scores/pong"), {
+    name: name,
+    score: score,
+    time: Date.now()
+  }).then(() => {
+    getScores();
+  });
+};
+
+window.getScores = async function() {
+  const q = query(ref(db, "scores/pong"), orderByChild("score"), limitToLast(10));
+  const snapshot = await get(q);
+
+  const scores = [];
+  snapshot.forEach(child => {
+    scores.push(child.val());
+  });
+
+  scores.reverse();
+
+  const list = document.getElementById("scoresList");
+
+  if (scores.length === 0) {
+    list.innerHTML = "No scores yet";
+    return;
+  }
+
+  list.innerHTML = scores.map((s, index) => {
+    return `<div>${index + 1}. ${s.name}: ${s.score}</div>`;
+  }).join("");
+};
+
+getScores();
+</script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
