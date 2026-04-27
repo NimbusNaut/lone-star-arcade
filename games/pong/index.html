@@ -10,12 +10,31 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: 'Poppins', sans-serif;
+      font-family: Arial, sans-serif;
       color: white;
+      overflow: hidden;
     }
+
     canvas {
       background: black;
       border: 4px solid #BF2F2F;
+    }
+
+    #leaderboard {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.75);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 210px;
+      z-index: 10;
+    }
+
+    #leaderboard strong {
+      display: block;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -24,19 +43,10 @@
 
 <canvas id="game" width="800" height="400"></canvas>
 
-<div id="leaderboard" style="
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(0,0,0,0.7);
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  max-width: 200px;
-">
+<div id="leaderboard">
   <strong>🏆 Top Scores</strong>
   <div id="scoresList">Loading...</div>
-</div>  
+</div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -44,16 +54,13 @@ const ctx = canvas.getContext("2d");
 
 let paddleHeight = 80;
 let paddleWidth = 10;
-
 let leftY = 150;
 let rightY = 150;
-
 let ballX = 400;
 let ballY = 200;
 let ballSpeedX = 4;
 let ballSpeedY = 4;
-
-let score = 0; // 🔥 add score tracking
+let score = 0;
 
 function drawRect(x, y, w, h) {
   ctx.fillStyle = "white";
@@ -74,18 +81,15 @@ function moveBall() {
     ballSpeedY *= -1;
   }
 
-  // left paddle
   if (ballX <= 20 && ballY > leftY && ballY < leftY + paddleHeight) {
     ballSpeedX *= -1;
-    score++; // 🔥 increase score
+    score++;
   }
 
-  // right paddle
   if (ballX >= 780 && ballY > rightY && ballY < rightY + paddleHeight) {
     ballSpeedX *= -1;
   }
 
-  // MISS = submit score
   if (ballX < 0) {
     submitScore();
     resetBall();
@@ -107,11 +111,9 @@ function draw() {
 
   drawRect(10, leftY, paddleWidth, paddleHeight);
   drawRect(780, rightY, paddleWidth, paddleHeight);
-
   drawBall();
 
-  // 🔥 draw score
-  ctx.font = "24px Poppins";
+  ctx.font = "24px Arial";
   ctx.fillText("Score: " + score, 20, 30);
 }
 
@@ -136,19 +138,16 @@ function gameLoop() {
 
 setInterval(gameLoop, 1000 / 60);
 
-// 🔥 submit score to Firebase
 function submitScore() {
   if (score <= 0) return;
 
   const name = prompt("Enter your name:");
-
   if (!name) return;
 
   saveScore(name, score);
 }
 </script>
 
-<!-- 🔥 FIREBASE LEADERBOARD -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
 import { getDatabase, ref, push, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
@@ -200,42 +199,6 @@ window.getScores = async function() {
 };
 
 getScores();
-</script>
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDUvm6aa-6FjJpCS6Ly4sVucjJPuNbgW-I",
-  authDomain: "lone-star-arcade.firebaseapp.com",
-  databaseURL: "https://lone-star-arcade-default-rtdb.firebaseio.com/",
-  projectId: "lone-star-arcade",
-  storageBucket: "lone-star-arcade.firebasestorage.app",
-  messagingSenderId: "883063669150",
-  appId: "1:883063669150:web:2aca2e85fa0b906f86568f"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// SAVE SCORE
-window.saveScore = function(name, score) {
-  push(ref(db, "scores/pong"), {
-    name,
-    score,
-    time: Date.now()
-  });
-}
-
-// GET SCORES (for later UI)
-window.getScores = async function() {
-  const q = query(ref(db, "scores/pong"), orderByChild("score"), limitToLast(10));
-  const snapshot = await get(q);
-
-  const scores = [];
-  snapshot.forEach(child => {
-    scores.push(child.val());
-  });
-
-  console.log(scores.reverse());
-}
 </script>
 
 </body>
