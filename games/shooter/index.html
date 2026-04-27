@@ -13,6 +13,7 @@
       font-family: Arial, sans-serif;
       color: white;
       overflow: hidden;
+      touch-action: none;
     }
 
     canvas {
@@ -57,10 +58,23 @@ let enemies = [];
 let score = 0;
 let gameOver = false;
 
-document.addEventListener("mousemove", e => {
+function movePlayer(clientX) {
   const rect = canvas.getBoundingClientRect();
-  playerX = e.clientX - rect.left - 10;
+  const scaleX = canvas.width / rect.width;
+  playerX = (clientX - rect.left) * scaleX - 10;
+
+  if (playerX < 0) playerX = 0;
+  if (playerX > 380) playerX = 380;
+}
+
+document.addEventListener("mousemove", e => {
+  movePlayer(e.clientX);
 });
+
+document.addEventListener("touchmove", e => {
+  e.preventDefault();
+  movePlayer(e.touches[0].clientX);
+}, { passive: false });
 
 document.addEventListener("click", () => {
   if (!gameOver) {
