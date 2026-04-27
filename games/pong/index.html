@@ -24,12 +24,11 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.8);
       padding: 12px;
       border-radius: 8px;
+      width: 200px;
       font-size: 14px;
-      width: 210px;
-      z-index: 10;
     }
 
     #leaderboard strong {
@@ -54,12 +53,15 @@ const ctx = canvas.getContext("2d");
 
 let paddleHeight = 80;
 let paddleWidth = 10;
+
 let leftY = 150;
 let rightY = 150;
+
 let ballX = 400;
 let ballY = 200;
 let ballSpeedX = 4;
 let ballSpeedY = 4;
+
 let score = 0;
 
 function drawRect(x, y, w, h) {
@@ -77,26 +79,32 @@ function moveBall() {
   ballX += ballSpeedX;
   ballY += ballSpeedY;
 
+  // top/bottom bounce
   if (ballY <= 0 || ballY >= canvas.height) {
     ballSpeedY *= -1;
   }
 
+  // player paddle hit
   if (ballX <= 20 && ballY > leftY && ballY < leftY + paddleHeight) {
     ballSpeedX *= -1;
     score++;
   }
 
+  // computer paddle hit
   if (ballX >= 780 && ballY > rightY && ballY < rightY + paddleHeight) {
     ballSpeedX *= -1;
   }
 
+  // 🔥 PLAYER MISS = submit + reset
   if (ballX < 0) {
     submitScore();
     resetBall();
   }
 
+  // 🔥 COMPUTER MISS = JUST RESET BALL (no score reset)
   if (ballX > canvas.width) {
-    resetBall();
+    ballX = 400;
+    ballY = 200;
   }
 }
 
@@ -111,6 +119,7 @@ function draw() {
 
   drawRect(10, leftY, paddleWidth, paddleHeight);
   drawRect(780, rightY, paddleWidth, paddleHeight);
+
   drawBall();
 
   ctx.font = "24px Arial";
@@ -167,8 +176,8 @@ const db = getDatabase(app);
 
 window.saveScore = function(name, score) {
   push(ref(db, "scores/pong"), {
-    name: name,
-    score: score,
+    name,
+    score,
     time: Date.now()
   }).then(() => {
     getScores();
@@ -176,26 +185,32 @@ window.saveScore = function(name, score) {
 };
 
 window.getScores = async function() {
-  const q = query(ref(db, "scores/pong"), orderByChild("score"), limitToLast(10));
-  const snapshot = await get(q);
-
-  const scores = [];
-  snapshot.forEach(child => {
-    scores.push(child.val());
-  });
-
-  scores.reverse();
-
   const list = document.getElementById("scoresList");
 
-  if (scores.length === 0) {
-    list.innerHTML = "No scores yet";
-    return;
-  }
+  try {
+    const q = query(ref(db, "scores/pong"), orderByChild("score"), limitToLast(10));
+    const snapshot = await get(q);
 
-  list.innerHTML = scores.map((s, index) => {
-    return `<div>${index + 1}. ${s.name}: ${s.score}</div>`;
-  }).join("");
+    const scores = [];
+    snapshot.forEach(child => {
+      scores.push(child.val());
+    });
+
+    scores.reverse();
+
+    if (scores.length === 0) {
+      list.innerHTML = "No scores yet";
+      return;
+    }
+
+    list.innerHTML = scores.map((s, i) =>
+      `<div>${i + 1}. ${s.name}: ${s.score}</div>`
+    ).join("");
+
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = "⚠️ Error loading scores";
+  }
 };
 
 getScores();
