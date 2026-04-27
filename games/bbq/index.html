@@ -88,15 +88,25 @@ function update() {
 
   foodY += 4;
 
-  if (foodY > 550 && foodX > basketX && foodX < basketX + 80) {
-    score++;
-    foodY = 0;
-    foodX = Math.random() * 350;
-  }
+const foodRadius = 10;
+const basketY = 550;
+const basketHeight = 20;
+const basketWidth = 80;
 
-  if (foodY > 600) {
-    endGame();
-  }
+const caught =
+  foodY + foodRadius >= basketY &&
+  foodY - foodRadius <= basketY + basketHeight &&
+  foodX >= basketX &&
+  foodX <= basketX + basketWidth;
+
+if (caught) {
+  score++;
+  foodY = 0;
+  foodX = Math.random() * 350;
+}
+
+if (foodY - foodRadius > 600) {
+  endGame();
 }
 
 function endGame() {
